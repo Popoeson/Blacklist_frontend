@@ -1,65 +1,58 @@
-
-/* Global styles */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #2e2e2e; /* Dark Ash Background */
-    color: #e0e0e0; /* Silvery White Text */
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: #2b2b2b; /* dark ash */
+  color: #f0f0f0; /* silvery white */
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-h1 {
-    text-align: center;
-    color: #e0e0e0;
-    margin-bottom: 20px;
-}
-
-/* Form container styles */
 .form-container {
-    background-color: #383838;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    max-width: 400px;
-    width: 100%;
-    text-align: center;
+  background-color: #3a3a3a;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
 }
 
-/* Input fields and buttons */
-input[type="text"], input[type="password"], input[type="file"] {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #555;
-    background-color: #2e2e2e;
-    color: #e0e0e0;
-    border-radius: 5px;
+form input {
+  width: 90%;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  border-radius: 8px;
+  background-color: #555;
+  color: #fff;
+  font-size: 16px;
 }
 
-button {
-    background-color: #444;
-    color: #e0e0e0;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    width: 100%;
+form input::placeholder {
+  color: #ccc;
 }
 
-button:hover {
-    background-color: #555;
+form button {
+  width: 95%;
+  padding: 12px;
+  margin-top: 15px;
+  background-color: #555;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
 }
 
-/* Link styles */
-a {
-    color: #e0e0e0;
-    text-decoration: none;
+form button:hover {
+  background-color: #666;
 }
 
-a:hover {
-    text-decoration: underline;
+#message {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #9edc9e;
 }
