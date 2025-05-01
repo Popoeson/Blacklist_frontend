@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Blacklist</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Blacklist</h1>
+  <div id="employee-list"></div>
+
+  <script>
+    fetch('https://your-backend-url/employees')
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById('employee-list');
+        data.forEach(emp => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <img src="https://your-backend-url/uploads/${emp.photo}" alt="${emp.name}" />
+            <h2>${emp.name}</h2>
+            <p>${emp.reason}</p>
+          `;
+          container.appendChild(card);
+        });
+      });
+  </script>
+</body>
+</html>

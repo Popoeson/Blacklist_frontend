@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head><title>Upload Employee</title></head>
+<body>
+  <h2>Upload Bad Employee</h2>
+  <form action="https://your-backend-url/upload" method="POST" enctype="multipart/form-data">
+    <input type="text" name="name" placeholder="Employee Name" required /><br />
+    <textarea name="reason" placeholder="What did this employee do?" required></textarea><br />
+    <input type="file" name="photo" required /><br />
+    <button type="submit">Upload</button>
+  </form>
+</body>
+</html>
