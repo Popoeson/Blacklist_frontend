@@ -16,21 +16,24 @@
   </div>
 
   <script>
-    document.getElementById('registerForm').addEventListener('submit', async function (e) {
-      e.preventDefault();
+  document.querySelector("form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const username = document.querySelector("#username").value;
+    const password = document.querySelector("#password").value;
 
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-
-      const response = await fetch("https://blacklist-ohax.onrender.com/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password })
-      });
-
-      const data = await response.json();
-      document.getElementById('message').innerText = data.message;
+    const res = await fetch("https://blacklist-ohax.onrender.com/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
     });
-  </script>
+
+    if (res.ok) {
+      alert("Registration successful");
+      window.location.href = "login.html";
+    } else {
+      alert("Registration failed");
+    }
+  });
+      </script>
 </body>
 </html>
