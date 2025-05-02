@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 // Replace with your actual MongoDB credentials
-const MONGO_URI = "mongodb+srv://<your_username>:<your_encoded_password>@blacklist-cluster.npsjdlx.mongodb.net/?retryWrites=true&w=majority&appName=Blacklist-cluster";
+const MONGO_URI = "mongodb+srv://<Admin>:<T1m07hy%24%24>@blacklist-cluster.npsjdlx.mongodb.net/?retryWrites=true&w=majority&appName=Blacklist-cluster";
 
 // Connect Mongoose
 mongoose.connect(MONGO_URI, {
