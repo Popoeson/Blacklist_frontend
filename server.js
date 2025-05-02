@@ -1,48 +1,67 @@
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
-const bodyParser = require('body-parser');
-
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 const app = express();
-const PORT = 5000;
-const DATA_FILE = './data.json';
+const PORT = process.env.PORT || 3000;
 
+// Actual MongoDB connection string
+const MONGO_URI = "mongodb+srv://<db_username>:<db_password>@blacklist-cluster.npsjdlx.mongodb.net/?retryWrites=true&w=majority&appName=Blacklist-cluster";
+
+// Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-// Load users from file
-function loadUsers() {
-  if (!fs.existsSync(DATA_FILE)) return [];
-  const data = fs.readFileSync(DATA_FILE);
-  return JSON.parse(data);
-}
+// MongoDB connection
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.error("MongoDB connection error:", err));
 
-// Save users to file
-function saveUsers(users) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(users, null, 2));
-}
+// Mongoose Schemas
+const userSchema = new mongoose.Schema({
+  username: { type: String, unique: true },
+  password: String,
+});
 
-// Register
-app.post('/api/auth/register', (req, res) => {
+const User = mongoose.model('User', userSchema);
+
+// Routes
+app.post('/api/auth/register', async (req, res) => {
   const { username, password } = req.body;
-  const users = loadUsers();
-  if (users.find(user => user.username === username)) {
-    return res.status(400).json({ message: 'User already exists' });
+  try {
+    const existing = await User.findOne({ username });
+    if (existing) {
+      return res.status(400).json({ message: "Username already exists" });
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ username, password: hashedPassword });
+    await newUser.save();
+    res.status(201).json({ message: "Registration successful" });
+  } catch (err) {
+    console.error("Registration error:", err);
+    res.status(500).json({ message: "Server error during registration" });
   }
-  users.push({ username, password });
-  saveUsers(users);
-  res.json({ message: 'Registration successful' });
 });
 
-// Login
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body;
-  const users = loadUsers();
-  const user = users.find(user => user.username === username && user.password === password);
-  if (!user) return res.status(401).json({ message: 'Invalid credentials' });
-  res.json({ message: 'Login successful', token: 'dummy-token' });
+  try {
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid username or password" });
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid username or password" });
+    }
+    res.json({ message: "Login successful" });
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ message: "Server error during login" });
+  }
 });
 
+// Start server
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
