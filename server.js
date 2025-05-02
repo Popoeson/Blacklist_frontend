@@ -6,7 +6,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Actual MongoDB connection string
-const MONGO_URI = "mongodb+srv://<admin>:<T1m07hy%24%24>@blacklist-cluster.npsjdlx.mongodb.net/?retryWrites=true&w=majority&appName=Blacklist-cluster";
+const MONGO_URI = "mongodb+srv://<Admin>:<T1m07hy%24%24>@blacklist-cluster.npsjdlx.mongodb.net/?retryWrites=true&w=majority&appName=Blacklist-cluster";
 
 // Middleware
 app.use(cors());
