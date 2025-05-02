@@ -1,15 +1,14 @@
 {
   "name": "blacklist-backend",
   "version": "1.0.0",
-  "description": "Backend for Blacklist project with MongoDB Atlas",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "bcrypt": "^5.1.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
-    "mongoose": "^7.3.1"
+    "mongoose": "^7.5.0",
+    "mongodb": "^6.5.0"
   }
 }
