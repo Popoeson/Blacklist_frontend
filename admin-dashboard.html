@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="form-style.css">
+  <style>
+    .dashboard-section {
+      margin-bottom: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      color: white;
+    }
+    th {
+      background-color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Admin Dashboard</h2>
+
+    <div class="dashboard-section">
+      <h3>Registered Admins</h3>
+      <table id="adminsTable">
+        <thead><tr><th>Username</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="dashboard-section">
+      <h3>Login Sessions</h3>
+      <table id="sessionsTable">
+        <thead><tr><th>Username</th><th>Login Time</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="dashboard-section">
+      <h3>Uploaded Employees</h3>
+      <table id="employeesTable">
+        <thead><tr><th>Name</th><th>Photo</th><th>Uploaded By</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const baseURL = "https://blacklist-ohax.onrender.com";
+
+    async function loadData() {
+      const [admins, sessions, employees] = await Promise.all([
+        fetch(`${baseURL}/api/admins`).then(res => res.json()),
+        fetch(`${baseURL}/api/sessions`).then(res => res.json()),
+        fetch(`${baseURL}/api/employees`).then(res => res.json())
+      ]);
+
+      const adminRows = admins.map(admin =>
+        `<tr><td>${admin.username}</td></tr>`
+      ).join('');
+      document.querySelector("#adminsTable tbody").innerHTML = adminRows;
+
+      const sessionRows = sessions.map(session =>
+        `<tr><td>${session.username}</td><td>${new Date(session.loginTime).toLocaleString()}</td></tr>`
+      ).join('');
+      document.querySelector("#sessionsTable tbody").innerHTML = sessionRows;
+
+      const employeeRows = employees.map(emp =>
+        `<tr><td>${emp.name}</td><td>${emp.photo || 'N/A'}</td><td>${emp.uploadedBy || 'Unknown'}</td></tr>`
+      ).join('');
+      document.querySelector("#employeesTable tbody").innerHTML = employeeRows;
+    }
+
+    loadData();
+  </script>
+</body>
+</html>
