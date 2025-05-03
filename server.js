@@ -1,13 +1,17 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const multer = require('multer');
+const path = require('path');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
-const multer = require('multer');  // Add multer here
-const path = require('path');  // Add path to handle file extensions
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.static('uploads')); // Serve static files from the "uploads" folder
 
 // MongoDB Connection
 mongoose.connect('mongodb+srv://Admin:BlacklistDatabase@blacklist-cluster.npsjdlx.mongodb.net/?retryWrites=true&w=majority&appName=Blacklist-cluster', {
@@ -24,6 +28,40 @@ const userSchema = new mongoose.Schema({
 });
 
 const User = mongoose.model('User', userSchema);
+
+// Employee Schema
+const employeeSchema = new mongoose.Schema({
+  name: String,
+  photo: String,
+  reason: String,
+});
+
+const Employee = mongoose.model('Employee', employeeSchema);
+
+// Multer Storage Configuration (for storing files in uploads folder)
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads');  // Store files in "uploads" folder
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));  // Unique filename
+  }
+});
+
+// File filter to accept only images
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);  // Accept image files
+  } else {
+    cb(new Error('Not an image'), false);  // Reject non-image files
+  }
+};
+
+// Multer upload configuration
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter
+});
 
 // Register Endpoint
 app.post('/api/auth/register', async (req, res) => {
@@ -68,38 +106,34 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// Multer Config for File Uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads');  // Ensure this is the same name as your uploads folder
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));  // Unique file name with extension
-  }
-});
-
-const upload = multer({ storage });
-
-// Endpoint for Uploading Employee
+// Employee Upload Endpoint
 app.post('/api/employees', upload.single('photo'), async (req, res) => {
   try {
-    const { name } = req.body;
-    const file = req.file;  // The uploaded file
+    const { name, reason } = req.body;
+    const photo = req.file.filename;  // Get the uploaded file's name
 
-    if (!file) {
-      return res.status(400).json({ message: 'No file uploaded' });
-    }
-
-    // You can save the file info to MongoDB here, e.g., employee name and file path
-    res.status(200).json({ message: 'Employee uploaded successfully', fileName: file.filename });
+    const newEmployee = new Employee({ name, reason, photo });
+    await newEmployee.save();
+    res.status(201).json({ message: 'Employee uploaded successfully' });
   } catch (err) {
-    console.error('Upload error:', err);
+    console.error('Error uploading employee:', err);
     res.status(500).json({ message: 'Error uploading employee' });
   }
 });
 
+// Fetch Employees Endpoint
+app.get('/api/employees', async (req, res) => {
+  try {
+    const employees = await Employee.find();  // Fetch all employees from DB
+    res.status(200).json(employees);
+  } catch (err) {
+    console.error('Error fetching employees:', err);
+    res.status(500).json({ message: 'Error fetching employees' });
+  }
+});
+
 // Start Server
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
