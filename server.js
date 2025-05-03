@@ -2,10 +2,13 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static('uploads')); // Serve uploaded files
 
 // MongoDB Connection
 mongoose.connect('mongodb+srv://Admin:BlacklistDatabase@blacklist-cluster.npsjdlx.mongodb.net/?retryWrites=true&w=majority&appName=Blacklist-cluster', {
@@ -20,8 +23,25 @@ const userSchema = new mongoose.Schema({
   username: String,
   password: String
 });
-
 const User = mongoose.model('User', userSchema);
+
+// Employee Schema
+const employeeSchema = new mongoose.Schema({
+  name: String,
+  photoUrl: String
+});
+const Employee = mongoose.model('Employee', employeeSchema);
+
+// Multer Configuration
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage });
 
 // Register Endpoint
 app.post('/api/auth/register', async (req, res) => {
@@ -63,6 +83,22 @@ app.post('/api/auth/login', async (req, res) => {
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ message: 'Server error during login' });
+  }
+});
+
+// Upload Employee Endpoint
+app.post('/api/employees', upload.single('photo'), async (req, res) => {
+  try {
+    const { name } = req.body;
+    const photoUrl = req.file ? req.file.path : '';
+
+    const newEmployee = new Employee({ name, photoUrl });
+    await newEmployee.save();
+
+    res.status(201).json({ message: 'Employee uploaded successfully' });
+  } catch (err) {
+    console.error('Upload error:', err);
+    res.status(500).json({ message: 'Server error during employee upload' });
   }
 });
 
