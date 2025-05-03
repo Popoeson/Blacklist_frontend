@@ -1,72 +1,73 @@
 const express = require('express');
-const fs = require('fs');
-const bcrypt = require('bcryptjs'); // Changed to bcryptjs
-const cors = require('cors');
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection
-mongoose.connect("mongodb+srv://admin:T1m07hy$$@blacklist-cluster.npsjdlx.mongodb.net/?retryWrites=true&w=majority&appName=Blacklist-cluster", {
+// MongoDB Connection
+mongoose.connect('mongodb+srv://Admin:BlacklistDatabase@blacklist-cluster.npsjdlx.mongodb.net/?retryWrites=true&w=majority&appName=Blacklist-cluster', {
   useNewUrlParser: true,
   useUnifiedTopology: true
-}).then(() => {
-  console.log("Connected to MongoDB Atlas");
-}).catch(err => {
-  console.error("MongoDB connection error:", err);
-});
+})
+.then(() => console.log('Connected to MongoDB'))
+.catch(err => console.error('MongoDB connection error:', err));
 
-// User schema
+// User Schema
 const userSchema = new mongoose.Schema({
   username: String,
   password: String
 });
+
 const User = mongoose.model('User', userSchema);
 
-// Register
+// Register Endpoint
 app.post('/api/auth/register', async (req, res) => {
-  const { username, password } = req.body;
-
   try {
-    const existing = await User.findOne({ username });
-    if (existing) {
-      return res.status(400).json({ message: "Username already taken" });
+    const { username, password } = req.body;
+    const existingUser = await User.findOne({ username });
+
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
     }
 
-    const hashed = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, password: hashed });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ username, password: hashedPassword });
     await newUser.save();
+    res.status(201).json({ message: 'User registered successfully' });
 
-    res.status(201).json({ message: "Registration successful" });
-  } catch (error) {
-    console.error("Registration error:", error);
-    res.status(500).json({ message: "Server error" });
+  } catch (err) {
+    console.error('Registration error:', err);
+    res.status(500).json({ message: 'Server error during registration' });
   }
 });
 
-// Login
+// Login Endpoint
 app.post('/api/auth/login', async (req, res) => {
-  const { username, password } = req.body;
-
   try {
+    const { username, password } = req.body;
     const user = await User.findOne({ username });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(400).json({ message: "Invalid credentials" });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
 
-    res.json({ message: "Login successful" });
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ message: "Server error" });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+
+    res.status(200).json({ message: 'Login successful' });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ message: 'Server error during login' });
   }
 });
 
-// Start server
+// Start Server
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
