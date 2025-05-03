@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Blacklist</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -9,7 +11,7 @@
   <div id="employee-list"></div>
 
   <script>
-    fetch('https://blacklist-ohax.onrender.com/api/employees')
+    fetch('https://your-backend-url/api/employees')  // Make sure to update this with your actual backend URL
       .then(res => res.json())
       .then(data => {
         const container = document.getElementById('employee-list');
@@ -17,12 +19,15 @@
           const card = document.createElement('div');
           card.className = 'card';
           card.innerHTML = `
-            <img src="https://blacklist-ohax.onrender.com/uploads/${emp.photo}" alt="${emp.name}" />
+            <img src="https://your-backend-url/uploads/${emp.photo}" alt="${emp.name}" />
             <h2>${emp.name}</h2>
-            <p>${emp.reason}</p>
+            <p><strong>Description:</strong> ${emp.description}</p>  <!-- Added the description here -->
           `;
           container.appendChild(card);
         });
+      })
+      .catch(error => {
+        console.error('Error fetching employee data:', error);
       });
   </script>
 </body>
