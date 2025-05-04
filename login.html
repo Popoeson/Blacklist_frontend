@@ -33,6 +33,9 @@
         const messageEl = document.getElementById('message');
 
         if (response.ok) {
+          // Save username to localStorage for session tracking
+          localStorage.setItem('username', username);
+
           messageEl.style.color = "lightgreen";
           messageEl.innerText = data.message || "Login successful.";
 
