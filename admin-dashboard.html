@@ -1,25 +1,58 @@
-
 <!DOCTYPE html>
 <html>
 <head>
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    .dashboard-section {
-      margin-bottom: 30px;
+    body {
+      background-color: #1e1e1e;
+      font-family: Arial, sans-serif;
+      color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
     }
+
+    .form-container {
+      max-width: 1000px;
+      margin: auto;
+      background-color: #2b2b2b;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    h2, h3 {
+      text-align: center;
+      color: #fff;
+    }
+
+    .dashboard-section {
+      margin-bottom: 40px;
+    }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
+      background-color: #3a3a3a;
     }
+
     th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
+      border: 1px solid #444;
+      padding: 10px;
+      text-align: center;
       color: white;
     }
+
     th {
-      background-color: #333;
+      background-color: #444;
+    }
+
+    img.emp-photo {
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 4px;
     }
   </style>
 </head>
@@ -56,26 +89,36 @@
     const baseURL = "https://blacklist-ohax.onrender.com";
 
     async function loadData() {
-      const [admins, sessions, employees] = await Promise.all([
-        fetch(`${baseURL}/api/admins`).then(res => res.json()),
-        fetch(`${baseURL}/api/sessions`).then(res => res.json()),
-        fetch(`${baseURL}/api/employees`).then(res => res.json())
-      ]);
+      try {
+        const [admins, sessions, employees] = await Promise.all([
+          fetch(`${baseURL}/api/admins`).then(res => res.json()),
+          fetch(`${baseURL}/api/sessions`).then(res => res.json()),
+          fetch(`${baseURL}/api/employees`).then(res => res.json())
+        ]);
 
-      const adminRows = admins.map(admin =>
-        `<tr><td>${admin.username}</td></tr>`
-      ).join('');
-      document.querySelector("#adminsTable tbody").innerHTML = adminRows;
+        // Load admins
+        document.querySelector("#adminsTable tbody").innerHTML = admins.map(admin =>
+          `<tr><td>${admin.username}</td></tr>`
+        ).join('');
 
-      const sessionRows = sessions.map(session =>
-        `<tr><td>${session.username}</td><td>${new Date(session.loginTime).toLocaleString()}</td></tr>`
-      ).join('');
-      document.querySelector("#sessionsTable tbody").innerHTML = sessionRows;
+        // Load sessions
+        document.querySelector("#sessionsTable tbody").innerHTML = sessions.map(session =>
+          `<tr><td>${session.username}</td><td>${new Date(session.loginTime).toLocaleString()}</td></tr>`
+        ).join('');
 
-      const employeeRows = employees.map(emp =>
-        `<tr><td>${emp.name}</td><td>${emp.photo || 'N/A'}</td><td>${emp.uploadedBy || 'Unknown'}</td></tr>`
-      ).join('');
-      document.querySelector("#employeesTable tbody").innerHTML = employeeRows;
+        // Load employees
+        document.querySelector("#employeesTable tbody").innerHTML = employees.map(emp =>
+          `<tr>
+            <td>${emp.name}</td>
+            <td>
+              ${emp.photo ? `<img src="${baseURL}/uploads/${emp.photo}" alt="${emp.name}" class="emp-photo" />` : 'N/A'}
+            </td>
+            <td>${emp.uploadedBy || 'Unknown'}</td>
+          </tr>`
+        ).join('');
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
+      }
     }
 
     loadData();
