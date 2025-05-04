@@ -11,7 +11,7 @@
   <div id="employee-list"></div>
 
   <script>
-    fetch('https://your-backend-url/api/employees')  // Make sure to update this with your actual backend URL
+    fetch('https://blacklist-ohax.onrender.com/api/employees')
       .then(res => res.json())
       .then(data => {
         const container = document.getElementById('employee-list');
@@ -19,9 +19,9 @@
           const card = document.createElement('div');
           card.className = 'card';
           card.innerHTML = `
-            <img src="https://your-backend-url/uploads/${emp.photo}" alt="${emp.name}" />
+            <img src="https://blacklist-ohax.onrender.com/uploads/${emp.photo}" alt="${emp.name}" />
             <h2>${emp.name}</h2>
-            <p><strong>Description:</strong> ${emp.description}</p>  <!-- Added the description here -->
+            <p><strong>Description:</strong> ${emp.description}</p>
           `;
           container.appendChild(card);
         });
