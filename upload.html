@@ -167,7 +167,7 @@
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
-              <img src="https://blacklist-ohax.onrender.com/${emp.photo}" alt="${emp.name}" />
+              <img src="https://blacklist-ohax.onrender.com/uploads/${emp.photo}" alt="${emp.name}" />
               <h3>${emp.name}</h3>
               <p><strong>Description:</strong> ${emp.description || "Not provided"}</p>
             `;
@@ -179,7 +179,6 @@
         });
     }
 
-    // Load employee cards on page load
     window.onload = loadEmployees;
   </script>
 </body>
