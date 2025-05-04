@@ -1,3 +1,4 @@
+// server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const multer = require('multer');
@@ -11,9 +12,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// Serve images from /uploads path
-app.use('/uploads', express.static('uploads'));
+app.use(express.static('uploads'));
 
 // MongoDB Connection
 mongoose.connect('mongodb+srv://Admin:BlacklistDatabase@blacklist-cluster.npsjdlx.mongodb.net/?retryWrites=true&w=majority&appName=Blacklist-cluster', {
@@ -23,34 +22,25 @@ mongoose.connect('mongodb+srv://Admin:BlacklistDatabase@blacklist-cluster.npsjdl
 .then(() => console.log('Connected to MongoDB'))
 .catch(err => console.error('MongoDB connection error:', err));
 
-// Root Route
-app.get('/', (req, res) => {
-  res.send('Blacklist backend is running...');
-});
-
-// Admin/User Schema
-const userSchema = new mongoose.Schema({
-  username: String,
-  password: String
-});
+// Schemas and Models
+const userSchema = new mongoose.Schema({ username: String, password: String });
 const User = mongoose.model('User', userSchema);
 
-// Employee Schema
+const sessionSchema = new mongoose.Schema({ username: String, loginTime: { type: Date, default: Date.now } });
+const Session = mongoose.model('Session', sessionSchema);
+
 const employeeSchema = new mongoose.Schema({
   name: String,
   photo: String,
-  description: String
+  description: String,
+  uploadedBy: String
 });
 const Employee = mongoose.model('Employee', employeeSchema);
 
-// Multer Storage Configuration
+// Multer config
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
+  destination: (req, file, cb) => cb(null, 'uploads'),
+  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
 });
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image')) cb(null, true);
@@ -58,7 +48,7 @@ const fileFilter = (req, file, cb) => {
 };
 const upload = multer({ storage, fileFilter });
 
-// Register Endpoint
+// Register
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -70,59 +60,74 @@ app.post('/api/auth/register', async (req, res) => {
     await newUser.save();
     res.status(201).json({ message: "Registration successful" });
   } catch (err) {
-    console.error("Registration error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// Login Endpoint
+// Login
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
-
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
-    }
+    if (!user) return res.status(400).json({ message: "User not found" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid password" });
-    }
+    if (!isMatch) return res.status(400).json({ message: "Invalid password" });
 
-    res.json({ message: "Login successful" });
+    const session = new Session({ username });
+    await session.save();
+
+    res.json({ message: "Login successful", username });
   } catch (err) {
-    console.error("Login error:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// Upload Employee Endpoint
+// Upload Employee
 app.post('/api/employees', upload.single('photo'), async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, uploadedBy } = req.body;
     const photo = req.file.filename;
 
-    const newEmployee = new Employee({ name, description, photo });
+    const newEmployee = new Employee({ name, description, photo, uploadedBy });
     await newEmployee.save();
     res.status(201).json({ message: 'Employee uploaded successfully' });
   } catch (err) {
-    console.error('Error uploading employee:', err);
     res.status(500).json({ message: 'Error uploading employee' });
   }
 });
 
-// Fetch Employees
+// Get Employees
 app.get('/api/employees', async (req, res) => {
   try {
     const employees = await Employee.find();
     res.status(200).json(employees);
   } catch (err) {
-    console.error('Error fetching employees:', err);
     res.status(500).json({ message: 'Error fetching employees' });
+  }
+});
+
+// Get Admins
+app.get('/api/admins', async (req, res) => {
+  try {
+    const admins = await User.find({}, 'username');
+    res.json(admins);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching admins' });
+  }
+});
+
+// Get Sessions
+app.get('/api/sessions', async (req, res) => {
+  try {
+    const sessions = await Session.find();
+    res.json(sessions);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching sessions' });
   }
 });
 
 // Start server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
