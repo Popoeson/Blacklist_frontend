@@ -11,6 +11,8 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Serve images from /uploads path
 app.use('/uploads', express.static('uploads'));
 
 // MongoDB Connection
@@ -20,6 +22,11 @@ mongoose.connect('mongodb+srv://Admin:BlacklistDatabase@blacklist-cluster.npsjdl
 })
 .then(() => console.log('Connected to MongoDB'))
 .catch(err => console.error('MongoDB connection error:', err));
+
+// Root Route
+app.get('/', (req, res) => {
+  res.send('Blacklist backend is running...');
+});
 
 // Admin/User Schema
 const userSchema = new mongoose.Schema({
@@ -68,7 +75,7 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
-// Login Endpoint with detailed error handling
+// Login Endpoint
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
