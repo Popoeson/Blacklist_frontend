@@ -11,123 +11,156 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// Serve uploaded images from the /uploads route
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // MongoDB Connection
-mongoose.connect('mongodb+srv://Admin:BlacklistDatabase@blacklist-cluster.npsjdlx.mongodb.net/?retryWrites=true&w=majority&appName=Blacklist-cluster', {
+mongoose.connect(process.env.MONGO_URI || 'your_mongo_uri_here', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
 .then(() => console.log('Connected to MongoDB'))
 .catch(err => console.error('MongoDB connection error:', err));
 
-// Schemas and Models
+// Schemas
 const userSchema = new mongoose.Schema({ username: String, password: String });
-const User = mongoose.model('User', userSchema);
-
 const sessionSchema = new mongoose.Schema({ username: String, loginTime: { type: Date, default: Date.now } });
+const employeeSchema = new mongoose.Schema({ name: String, photo: String, description: String, uploadedBy: String });
+const tokenSchema = new mongoose.Schema({ token: String, claimedBy: String, createdAt: { type: Date, default: Date.now } });
+const companySchema = new mongoose.Schema({ token: String, password: String });
+
+const User = mongoose.model('User', userSchema);
 const Session = mongoose.model('Session', sessionSchema);
-
-const employeeSchema = new mongoose.Schema({
-  name: String,
-  photo: String,
-  description: String,
-  uploadedBy: String
-});
 const Employee = mongoose.model('Employee', employeeSchema);
+const Token = mongoose.model('Token', tokenSchema);
+const Company = mongoose.model('Company', companySchema);
 
-// Multer config
+// Multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads'),
   filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
 });
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image')) cb(null, true);
-  else cb(new Error('Only images are allowed'), false);
-};
-const upload = multer({ storage, fileFilter });
+const upload = multer({ storage, fileFilter: (req, file, cb) => {
+  cb(null, file.mimetype.startsWith('image'));
+}});
 
-// Register
+// Admin Auth
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const existing = await User.findOne({ username });
-    if (existing) return res.status(400).json({ message: "Username already exists" });
+    const exists = await User.findOne({ username });
+    if (exists) return res.status(400).json({ message: "Username already exists" });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, password: hashedPassword });
-    await newUser.save();
+    const hashed = await bcrypt.hash(password, 10);
+    await new User({ username, password: hashed }).save();
     res.status(201).json({ message: "Registration successful" });
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// Login
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await User.findOne({ username });
-    if (!user) return res.status(400).json({ message: "User not found" });
+    const admin = await User.findOne({ username });
+    if (!admin) return res.status(400).json({ message: "User not found" });
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid password" });
 
-    const session = new Session({ username });
-    await session.save();
-
+    await new Session({ username }).save();
     res.json({ message: "Login successful", username });
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// Upload Employee
+// Company Auth
+app.post('/api/company/register', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    const tokenDoc = await Token.findOne({ token });
+
+    if (!tokenDoc) return res.status(400).json({ message: "Invalid token" });
+    if (tokenDoc.claimedBy) return res.status(400).json({ message: "Token already used" });
+
+    const hashed = await bcrypt.hash(password, 10);
+    await new Company({ token, password: hashed }).save();
+
+    tokenDoc.claimedBy = token;
+    await tokenDoc.save();
+
+    res.status(201).json({ message: "Company registered successfully" });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.post('/api/company/login', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    const company = await Company.findOne({ token });
+    if (!company) return res.status(400).json({ message: "Company not found" });
+
+    const isMatch = await bcrypt.compare(password, company.password);
+    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+
+    res.json({ message: "Login successful", token });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Token Generation
+app.post('/api/tokens/generate', async (req, res) => {
+  const newToken = 'BL-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+  try {
+    await new Token({ token: newToken }).save();
+    res.json({ token: newToken });
+  } catch {
+    res.status(500).json({ message: "Failed to generate token" });
+  }
+});
+
+// Employee Upload
 app.post('/api/employees', upload.single('photo'), async (req, res) => {
   try {
     const { name, description, uploadedBy } = req.body;
     const photo = req.file.filename;
-
-    const newEmployee = new Employee({ name, description, photo, uploadedBy });
-    await newEmployee.save();
+    await new Employee({ name, description, photo, uploadedBy }).save();
     res.status(201).json({ message: 'Employee uploaded successfully' });
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: 'Error uploading employee' });
   }
 });
 
-// Get Employees
-app.get('/api/employees', async (req, res) => {
+app.get('/api/employees', async (_, res) => {
   try {
     const employees = await Employee.find();
     res.status(200).json(employees);
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: 'Error fetching employees' });
   }
 });
 
-// Get Admins
-app.get('/api/admins', async (req, res) => {
+// Admin Info
+app.get('/api/admins', async (_, res) => {
   try {
     const admins = await User.find({}, 'username');
     res.json(admins);
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: 'Error fetching admins' });
   }
 });
 
-// Get Sessions
-app.get('/api/sessions', async (req, res) => {
+app.get('/api/sessions', async (_, res) => {
   try {
     const sessions = await Session.find();
     res.json(sessions);
-  } catch (err) {
+  } catch {
     res.status(500).json({ message: 'Error fetching sessions' });
   }
 });
 
-// Start server
+// Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
