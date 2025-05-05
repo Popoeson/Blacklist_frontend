@@ -34,7 +34,7 @@ const Employee = mongoose.model('Employee', employeeSchema);
 const Token = mongoose.model('Token', tokenSchema);
 const Company = mongoose.model('Company', companySchema);
 
-// Multer
+// Multer config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads'),
   filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
@@ -43,7 +43,7 @@ const upload = multer({ storage, fileFilter: (req, file, cb) => {
   cb(null, file.mimetype.startsWith('image'));
 }});
 
-// Admin Auth
+// Admin Registration
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -58,6 +58,7 @@ app.post('/api/auth/register', async (req, res) => {
   }
 });
 
+// Admin Login
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -74,7 +75,7 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// Company Auth
+// Company Registration
 app.post('/api/company/register', async (req, res) => {
   try {
     const { token, password } = req.body;
@@ -95,6 +96,7 @@ app.post('/api/company/register', async (req, res) => {
   }
 });
 
+// Company Login
 app.post('/api/company/login', async (req, res) => {
   try {
     const { token, password } = req.body;
@@ -121,6 +123,20 @@ app.post('/api/tokens/generate', async (req, res) => {
   }
 });
 
+// Token Validation for Enter Token Page
+app.post('/api/tokens/validate', async (req, res) => {
+  try {
+    const { token } = req.body;
+    const tokenDoc = await Token.findOne({ token });
+    if (!tokenDoc) return res.status(400).json({ message: "Invalid token" });
+    if (tokenDoc.claimedBy) return res.status(400).json({ message: "Token already used" });
+
+    res.status(200).json({ message: "Token is valid" });
+  } catch {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 // Employee Upload
 app.post('/api/employees', upload.single('photo'), async (req, res) => {
   try {
@@ -133,6 +149,7 @@ app.post('/api/employees', upload.single('photo'), async (req, res) => {
   }
 });
 
+// Get Employees
 app.get('/api/employees', async (_, res) => {
   try {
     const employees = await Employee.find();
@@ -152,6 +169,7 @@ app.get('/api/admins', async (_, res) => {
   }
 });
 
+// Session Info
 app.get('/api/sessions', async (_, res) => {
   try {
     const sessions = await Session.find();
