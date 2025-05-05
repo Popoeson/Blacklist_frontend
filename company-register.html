@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Company Register</title>
+  <link rel="stylesheet" href="form-styles.css">
+</head>
+<body>
+  <div class="form-container">
+    <h2>Company Registration</h2>
+    <form id="registerForm">
+      <input type="text" id="name" placeholder="Company Name" required>
+      <input type="password" id="password" placeholder="Create Password" required>
+      <button type="submit">Register</button>
+    </form>
+    <p id="message"></p>
+  </div>
+
+  <script>
+    const token = localStorage.getItem("companyToken");
+    if (!token) window.location.href = "enter-token.html";
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      const response = await fetch("https://blacklist-ohax.onrender.com/api/company/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, name, password })
+      });
+
+      const data = await response.json();
+      const msg = document.getElementById('message');
+
+      if (response.ok) {
+        msg.style.color = "lightgreen";
+        msg.innerText = "Registration successful!";
+        localStorage.removeItem("companyToken");
+        setTimeout(() => window.location.href = "company-login.html", 1500);
+      } else {
+        msg.style.color = "orangered";
+        msg.innerText = data.message || "Registration failed.";
+      }
+    });
+  </script>
+</body>
+</html>

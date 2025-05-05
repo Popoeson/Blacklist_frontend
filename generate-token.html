@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generate Token</title>
+  <link rel="stylesheet" href="form-styles.css">
+</head>
+<body>
+  <div class="form-container">
+    <h2>Generate New Token</h2>
+    <button onclick="generateToken()">Generate Token</button>
+    <p id="tokenDisplay"></p>
+  </div>
+
+  <script>
+    async function generateToken() {
+      const res = await fetch("https://blacklist-ohax.onrender.com/api/company/generate-token", {
+        method: "POST"
+      });
+      const data = await res.json();
+      const display = document.getElementById('tokenDisplay');
+
+      if (res.ok) {
+        display.style.color = "lightgreen";
+        display.innerText = "New Token: " + data.token;
+      } else {
+        display.style.color = "orangered";
+        display.innerText = data.message || "Failed to generate token.";
+      }
+    }
+  </script>
+</body>
+</html>

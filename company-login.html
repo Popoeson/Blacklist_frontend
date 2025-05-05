@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Company Login</title>
+  <link rel="stylesheet" href="form-styles.css">
+</head>
+<body>
+  <div class="form-container">
+    <h2>Company Login</h2>
+    <form id="loginForm">
+      <input type="text" id="token" placeholder="Company Token" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+    <p id="message"></p>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const token = document.getElementById('token').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      const res = await fetch("https://blacklist-ohax.onrender.com/api/company/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password })
+      });
+
+      const data = await res.json();
+      const msg = document.getElementById('message');
+
+      if (res.ok) {
+        msg.style.color = "lightgreen";
+        msg.innerText = "Login successful.";
+        localStorage.setItem("companySession", JSON.stringify(data));
+        setTimeout(() => window.location.href = "company-dashboard.html", 1000);
+      } else {
+        msg.style.color = "orangered";
+        msg.innerText = data.message || "Login failed.";
+      }
+    });
+  </script>
+</body>
+</html>

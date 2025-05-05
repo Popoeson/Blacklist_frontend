@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Enter Token</title>
+  <link rel="stylesheet" href="form-styles.css">
+</head>
+<body>
+  <div class="form-container">
+    <h2>Enter Company Token</h2>
+    <input type="text" id="tokenInput" placeholder="Enter Token" required>
+    <button onclick="validateToken()">Continue</button>
+    <p id="message"></p>
+  </div>
+
+  <script>
+    async function validateToken() {
+      const token = document.getElementById('tokenInput').value.trim();
+      const res = await fetch("https://blacklist-ohax.onrender.com/api/company/validate-token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token })
+      });
+
+      const data = await res.json();
+      const msg = document.getElementById('message');
+      if (res.ok && data.valid) {
+        localStorage.setItem("companyToken", token);
+        window.location.href = "company-register.html";
+      } else {
+        msg.style.color = "orangered";
+        msg.innerText = data.message || "Invalid token.";
+      }
+    }
+  </script>
+</body>
+</html>
