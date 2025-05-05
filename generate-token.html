@@ -1,31 +1,78 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Generate Token</title>
+  <meta charset="UTF-8">
+  <title>Generate Company Token</title>
   <link rel="stylesheet" href="form-styles.css">
+  <style>
+    .token-display {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    #generatedToken {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      background: #333;
+      color: #eee;
+      border: none;
+    }
+
+    button.copy-btn {
+      padding: 10px;
+      background: #555;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button.copy-btn:hover {
+      background: #777;
+    }
+  </style>
 </head>
 <body>
   <div class="form-container">
-    <h2>Generate New Token</h2>
-    <button onclick="generateToken()">Generate Token</button>
-    <p id="tokenDisplay"></p>
+    <h2>Generate Company Token</h2>
+    <button id="generateBtn">Generate Token</button>
+
+    <div class="token-display" style="display:none;">
+      <input type="text" id="generatedToken" readonly>
+      <button class="copy-btn" onclick="copyToken()">Copy</button>
+    </div>
+
+    <p id="message"></p>
   </div>
 
   <script>
-    async function generateToken() {
-      const res = await fetch("https://blacklist-ohax.onrender.com/api/company/generate-token", {
-        method: "POST"
+    document.getElementById('generateBtn').addEventListener('click', async () => {
+      const res = await fetch('https://blacklist-ohax.onrender.com/api/tokens/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
       });
-      const data = await res.json();
-      const display = document.getElementById('tokenDisplay');
 
-      if (res.ok) {
-        display.style.color = "lightgreen";
-        display.innerText = "New Token: " + data.token;
+      const data = await res.json();
+      if (data.token) {
+        document.querySelector('.token-display').style.display = 'flex';
+        document.getElementById('generatedToken').value = data.token;
+        document.getElementById('message').innerText = "Token generated successfully.";
+        document.getElementById('message').style.color = "lightgreen";
       } else {
-        display.style.color = "orangered";
-        display.innerText = data.message || "Failed to generate token.";
+        document.getElementById('message').innerText = data.message || "Error generating token.";
+        document.getElementById('message').style.color = "orangered";
       }
+    });
+
+    function copyToken() {
+      const tokenInput = document.getElementById('generatedToken');
+      tokenInput.select();
+      tokenInput.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(tokenInput.value).then(() => {
+        alert('Token copied to clipboard');
+      });
     }
   </script>
 </body>
