@@ -1,34 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Enter Token</title>
-  <link rel="stylesheet" href="form-styles.css">
+  <style>
+    body {
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+      font-family: sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .container {
+      background: #2a2a2a;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #000;
+      width: 300px;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+    input {
+      background: #444;
+      color: white;
+    }
+    button {
+      background: #5a5aff;
+      color: white;
+      cursor: pointer;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-  <div class="form-container">
+  <div class="container">
     <h2>Enter Company Token</h2>
-    <input type="text" id="tokenInput" placeholder="Enter Token" required>
-    <button onclick="validateToken()">Continue</button>
-    <p id="message"></p>
+    <input type="text" id="tokenInput" placeholder="Enter token" />
+    <button onclick="verifyToken()">Continue</button>
+    <div id="error" class="error"></div>
   </div>
 
   <script>
-    async function validateToken() {
+    async function verifyToken() {
       const token = document.getElementById('tokenInput').value.trim();
-      const res = await fetch("https://blacklist-ohax.onrender.com/api/company/validate-token", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token })
-      });
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = "";
 
-      const data = await res.json();
-      const msg = document.getElementById('message');
-      if (res.ok && data.valid) {
-        localStorage.setItem("companyToken", token);
-        window.location.href = "company-register.html";
-      } else {
-        msg.style.color = "orangered";
-        msg.innerText = data.message || "Invalid token.";
+      if (!token) {
+        errorDiv.textContent = "Token is required.";
+        return;
+      }
+
+      try {
+        const res = await fetch('https://blacklist-backend.onrender.com/api/tokens/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          localStorage.setItem("companyToken", token);
+          window.location.href = "register.html";
+        } else {
+          errorDiv.textContent = data.message || "Invalid token.";
+        }
+      } catch (err) {
+        errorDiv.textContent = "Network error.";
       }
     }
   </script>
