@@ -67,7 +67,7 @@
       }
 
       try {
-        const res = await fetch('https://blacklist-backend.vercel.app/api/company/login', {
+        const res = await fetch('https://blacklist-ohax.onrender.com/api/company/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token, password })
@@ -82,6 +82,7 @@
           errorMsg.textContent = data.message || "Login failed.";
         }
       } catch (err) {
+        console.error("Network or server error:", err);
         errorMsg.textContent = "Server error. Please try again.";
       }
     }
