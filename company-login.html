@@ -18,7 +18,6 @@
       padding: 40px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-      width: 300px;
     }
     input, button {
       width: 100%;
@@ -33,12 +32,12 @@
       color: #fff;
     }
     button {
-      background-color: #007bff;
+      background-color: #28a745;
       color: #fff;
       cursor: pointer;
     }
     button:hover {
-      background-color: #0056b3;
+      background-color: #1e7e34;
     }
     .error {
       color: red;
@@ -50,39 +49,39 @@
 <body>
   <div class="container">
     <h2>Company Login</h2>
-    <input type="text" id="tokenInput" placeholder="Token" />
-    <input type="password" id="passwordInput" placeholder="Password" />
-    <button onclick="loginCompany()">Login</button>
+    <input type="text" id="token" placeholder="Enter your token">
+    <input type="password" id="password" placeholder="Enter your password">
+    <button onclick="login()">Login</button>
     <div class="error" id="errorMsg"></div>
   </div>
 
   <script>
-    async function loginCompany() {
-      const token = document.getElementById("tokenInput").value.trim();
-      const password = document.getElementById("passwordInput").value.trim();
-      const errorMsg = document.getElementById("errorMsg");
+    async function login() {
+      const token = document.getElementById('token').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
 
       if (!token || !password) {
-        errorMsg.textContent = "All fields are required.";
+        errorMsg.textContent = "Please fill in both fields.";
         return;
       }
 
       try {
-        const response = await fetch("https://blacklist-ohax.onrender.com/api/company/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const res = await fetch('https://blacklist-backend.vercel.app/api/company/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token, password })
         });
 
-        const result = await response.json();
+        const data = await res.json();
 
-        if (response.ok) {
-          localStorage.setItem("companyToken", token);
-          window.location.href = "https://blacklist-frontend-sigma.vercel.app"; // Redirect here
+        if (res.ok) {
+          localStorage.setItem('companyToken', token);
+          window.location.href = 'https://blacklist-frontend-sigma.vercel.app';
         } else {
-          errorMsg.textContent = result.message || "Login failed.";
+          errorMsg.textContent = data.message || "Login failed.";
         }
-      } catch (error) {
+      } catch (err) {
         errorMsg.textContent = "Server error. Please try again.";
       }
     }
