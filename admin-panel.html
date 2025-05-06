@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Blacklist Admin Panel</title>
+  <style>
+    body {
+      background-color: #1f1f1f;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      margin-bottom: 30px;
+    }
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 250px;
+    }
+    button {
+      padding: 12px;
+      font-size: 16px;
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Navigation</h1>
+  <div class="button-container">
+    <button onclick="location.href='https://blacklist-frontend-sigma.vercel.app/generate-token.html'">Generate Token</button>
+    <button onclick="location.href='https://blacklist-frontend-sigma.vercel.app/register.html'">Admin Register</button>
+    <button onclick="location.href='https://blacklist-frontend-sigma.vercel.app/login.html'">Admin Login</button>
+    <button onclick="location.href='https://blacklist-frontend-sigma.vercel.app/upload.html'">Upload Employee</button>
+    <button onclick="location.href='https://blacklist-frontend-sigma.vercel.app'">Blacklisted Employees</button>
+  </div>
+</body>
+</html>
