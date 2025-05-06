@@ -53,7 +53,8 @@ app.post('/api/auth/register', async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
     await new User({ username, password: hashed }).save();
     res.status(201).json({ message: "Registration successful" });
-  } catch {
+  } catch (err) {
+    console.error("Admin registration error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -70,7 +71,8 @@ app.post('/api/auth/login', async (req, res) => {
 
     await new Session({ username }).save();
     res.json({ message: "Login successful", username });
-  } catch {
+  } catch (err) {
+    console.error("Admin login error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -91,7 +93,8 @@ app.post('/api/company/register', async (req, res) => {
     await tokenDoc.save();
 
     res.status(201).json({ message: "Company registered successfully" });
-  } catch {
+  } catch (err) {
+    console.error("Company registration error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -107,7 +110,8 @@ app.post('/api/company/login', async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
     res.json({ message: "Login successful", token });
-  } catch {
+  } catch (err) {
+    console.error("Company login error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -118,7 +122,8 @@ app.post('/api/tokens/generate', async (req, res) => {
   try {
     await new Token({ token: newToken }).save();
     res.json({ token: newToken });
-  } catch {
+  } catch (err) {
+    console.error("Token generation error:", err);
     res.status(500).json({ message: "Failed to generate token" });
   }
 });
@@ -127,12 +132,17 @@ app.post('/api/tokens/generate', async (req, res) => {
 app.post('/api/tokens/validate', async (req, res) => {
   try {
     const { token } = req.body;
+    console.log("Validating token:", token);
+
+    if (!token) return res.status(400).json({ message: "Token is required" });
+
     const tokenDoc = await Token.findOne({ token });
     if (!tokenDoc) return res.status(400).json({ message: "Invalid token" });
     if (tokenDoc.claimedBy) return res.status(400).json({ message: "Token already used" });
 
     res.status(200).json({ message: "Token is valid" });
-  } catch {
+  } catch (err) {
+    console.error("Token validation error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -144,7 +154,8 @@ app.post('/api/employees', upload.single('photo'), async (req, res) => {
     const photo = req.file.filename;
     await new Employee({ name, description, photo, uploadedBy }).save();
     res.status(201).json({ message: 'Employee uploaded successfully' });
-  } catch {
+  } catch (err) {
+    console.error("Employee upload error:", err);
     res.status(500).json({ message: 'Error uploading employee' });
   }
 });
@@ -154,7 +165,8 @@ app.get('/api/employees', async (_, res) => {
   try {
     const employees = await Employee.find();
     res.status(200).json(employees);
-  } catch {
+  } catch (err) {
+    console.error("Get employees error:", err);
     res.status(500).json({ message: 'Error fetching employees' });
   }
 });
@@ -164,7 +176,8 @@ app.get('/api/admins', async (_, res) => {
   try {
     const admins = await User.find({}, 'username');
     res.json(admins);
-  } catch {
+  } catch (err) {
+    console.error("Get admins error:", err);
     res.status(500).json({ message: 'Error fetching admins' });
   }
 });
@@ -174,7 +187,8 @@ app.get('/api/sessions', async (_, res) => {
   try {
     const sessions = await Session.find();
     res.json(sessions);
-  } catch {
+  } catch (err) {
+    console.error("Get sessions error:", err);
     res.status(500).json({ message: 'Error fetching sessions' });
   }
 });
