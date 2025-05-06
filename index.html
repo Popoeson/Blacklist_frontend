@@ -11,6 +11,13 @@
   <div id="employee-list"></div>
 
   <script>
+    // Redirect if not logged in as company
+    const token = localStorage.getItem('companyToken');
+    if (!token) {
+      window.location.href = 'company-login.html';
+    }
+
+    // Fetch and display employee data
     fetch('https://blacklist-ohax.onrender.com/api/employees')
       .then(res => res.json())
       .then(data => {
@@ -22,6 +29,7 @@
             <img src="https://blacklist-ohax.onrender.com/uploads/${emp.photo}" alt="${emp.name}" />
             <h2>${emp.name}</h2>
             <p><strong>Description:</strong> ${emp.description}</p>
+            <p><strong>Uploaded By:</strong> ${emp.uploadedBy || 'Unknown'}</p>
           `;
           container.appendChild(card);
         });
