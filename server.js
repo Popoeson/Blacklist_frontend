@@ -14,7 +14,7 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // MongoDB Connection
-mongoose.connect('mongodb+srv://Admin:BlacklistDatabase@blacklist-cluster.npsjdlx.mongodb.net/blacklistDB?retryWrites=true&w=majority', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://Admin:BlacklistDatabase@blacklist-cluster.npsjdlx.mongodb.net/blacklistDB?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
@@ -33,12 +33,17 @@ const companySchema = new mongoose.Schema({
   phone: String,
   password: String
 });
+const companySessionSchema = new mongoose.Schema({
+  companyName: String,
+  loginTime: { type: Date, default: Date.now }
+});
 
 const User = mongoose.model('User', userSchema);
 const Session = mongoose.model('Session', sessionSchema);
 const Employee = mongoose.model('Employee', employeeSchema);
 const Token = mongoose.model('Token', tokenSchema);
 const Company = mongoose.model('Company', companySchema);
+const CompanySession = mongoose.model('CompanySession', companySessionSchema);
 
 // Multer config
 const storage = multer.diskStorage({
@@ -83,7 +88,7 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// Updated Company Registration
+// Company Registration
 app.post('/api/company/register', async (req, res) => {
   try {
     const { token, name, email, phone, password } = req.body;
@@ -95,7 +100,7 @@ app.post('/api/company/register', async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
     await new Company({ token, name, email, phone, password: hashed }).save();
 
-    tokenDoc.claimedBy = token;
+    tokenDoc.claimedBy = name; // Fixed assignment
     await tokenDoc.save();
 
     res.status(201).json({ message: "Company registered successfully" });
@@ -114,6 +119,8 @@ app.post('/api/company/login', async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, company.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+
+    await new CompanySession({ companyName: company.name }).save();
 
     res.json({ message: "Login successful", token });
   } catch (err) {
@@ -134,12 +141,10 @@ app.post('/api/tokens/generate', async (req, res) => {
   }
 });
 
-// Token Validation for Enter Token Page
+// Token Validation
 app.post('/api/tokens/validate', async (req, res) => {
   try {
     const { token } = req.body;
-    console.log("Validating token:", token);
-
     if (!token) return res.status(400).json({ message: "Token is required" });
 
     const tokenDoc = await Token.findOne({ token });
@@ -177,7 +182,7 @@ app.get('/api/employees', async (_, res) => {
   }
 });
 
-// Admin Info
+// Get Admins
 app.get('/api/admins', async (_, res) => {
   try {
     const admins = await User.find({}, 'username');
@@ -188,13 +193,35 @@ app.get('/api/admins', async (_, res) => {
   }
 });
 
-// Session Info
+// Get Admin Sessions
 app.get('/api/sessions', async (_, res) => {
   try {
     const sessions = await Session.find();
     res.json(sessions);
   } catch (err) {
     console.error("Get sessions error:", err);
+    res.status(500).json({ message: 'Error fetching sessions' });
+  }
+});
+
+// Get Companies
+app.get('/api/companies', async (_, res) => {
+  try {
+    const companies = await Company.find({}, 'name email phone token');
+    res.json(companies);
+  } catch (err) {
+    console.error("Get companies error:", err);
+    res.status(500).json({ message: 'Error fetching companies' });
+  }
+});
+
+// Get Company Sessions
+app.get('/api/company-sessions', async (_, res) => {
+  try {
+    const sessions = await CompanySession.find();
+    res.json(sessions);
+  } catch (err) {
+    console.error("Get company sessions error:", err);
     res.status(500).json({ message: 'Error fetching sessions' });
   }
 });
