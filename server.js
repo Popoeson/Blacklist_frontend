@@ -88,20 +88,39 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// Company Registration
+// Company Registration with Debugging Logs
 app.post('/api/company/register', async (req, res) => {
   try {
     const { token, name, email, phone, password } = req.body;
+    console.log("Company registration attempt:", req.body);
 
     const tokenDoc = await Token.findOne({ token });
-    if (!tokenDoc) return res.status(400).json({ message: "Invalid token" });
-    if (tokenDoc.claimedBy) return res.status(400).json({ message: "Token already used" });
+    if (!tokenDoc) {
+      console.log("Token not found");
+      return res.status(400).json({ message: "Invalid token" });
+    }
+
+    if (tokenDoc.claimedBy) {
+      console.log("Token already claimed:", tokenDoc.claimedBy);
+      return res.status(400).json({ message: "Token already used" });
+    }
 
     const hashed = await bcrypt.hash(password, 10);
-    await new Company({ token, name, email, phone, password: hashed }).save();
 
-    tokenDoc.claimedBy = name; // Fixed assignment
+    const company = new Company({
+      token,
+      name,
+      email,
+      phone,
+      password: hashed
+    });
+
+    await company.save();
+    console.log("Company saved");
+
+    tokenDoc.claimedBy = name;
     await tokenDoc.save();
+    console.log("Token updated");
 
     res.status(201).json({ message: "Company registered successfully" });
   } catch (err) {
@@ -121,7 +140,6 @@ app.post('/api/company/login', async (req, res) => {
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
     await new CompanySession({ companyName: company.name }).save();
-
     res.json({ message: "Login successful", token });
   } catch (err) {
     console.error("Company login error:", err);
