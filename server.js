@@ -26,7 +26,13 @@ const userSchema = new mongoose.Schema({ username: String, password: String });
 const sessionSchema = new mongoose.Schema({ username: String, loginTime: { type: Date, default: Date.now } });
 const employeeSchema = new mongoose.Schema({ name: String, photo: String, description: String, uploadedBy: String });
 const tokenSchema = new mongoose.Schema({ token: String, claimedBy: String, createdAt: { type: Date, default: Date.now } });
-const companySchema = new mongoose.Schema({ token: String, password: String });
+const companySchema = new mongoose.Schema({
+  token: String,
+  name: String,
+  email: String,
+  phone: String,
+  password: String
+});
 
 const User = mongoose.model('User', userSchema);
 const Session = mongoose.model('Session', sessionSchema);
@@ -77,17 +83,17 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// Company Registration
+// Updated Company Registration
 app.post('/api/company/register', async (req, res) => {
   try {
-    const { token, password } = req.body;
-    const tokenDoc = await Token.findOne({ token });
+    const { token, name, email, phone, password } = req.body;
 
+    const tokenDoc = await Token.findOne({ token });
     if (!tokenDoc) return res.status(400).json({ message: "Invalid token" });
     if (tokenDoc.claimedBy) return res.status(400).json({ message: "Token already used" });
 
     const hashed = await bcrypt.hash(password, 10);
-    await new Company({ token, password: hashed }).save();
+    await new Company({ token, name, email, phone, password: hashed }).save();
 
     tokenDoc.claimedBy = token;
     await tokenDoc.save();
