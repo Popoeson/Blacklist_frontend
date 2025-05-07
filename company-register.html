@@ -84,9 +84,14 @@
 
         const result = await response.json();
         if (response.ok) {
-          message.textContent = result.message;
+          message.textContent = result.message + " Redirecting to login...";
           message.style.color = 'lightgreen';
           document.getElementById('companyRegisterForm').reset();
+
+          // Redirect after 2 seconds
+          setTimeout(() => {
+            window.location.href = 'company-login.html'; // make sure this is the correct path
+          }, 2000);
         } else {
           message.textContent = result.message;
           message.style.color = 'salmon';
