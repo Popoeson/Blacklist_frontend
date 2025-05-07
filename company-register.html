@@ -1,98 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Company Registration</title>
-  <style>
-    body {
-      background-color: #1f1f1f;
-      color: #f0f0f0;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .container {
-      background-color: #2c2c2c;
-      padding: 40px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-      width: 100%;
-      max-width: 400px;
-    }
-    input, button {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-    input {
-      background-color: #444;
-      color: #fff;
-    }
-    button {
-      background-color: #007bff;
-      color: #fff;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    .error {
-      color: red;
-      margin-top: 10px;
-      text-align: center;
-    }
-  </style>
+  <link rel="stylesheet" href="form-styles.css">
 </head>
 <body>
   <div class="container">
-    <h2>Company Registration</h2>
-    <input type="text" id="name" placeholder="Company Name" />
-    <input type="email" id="email" placeholder="Email" />
-    <input type="tel" id="phone" placeholder="Phone Number" />
-    <input type="password" id="password" placeholder="Password" />
-    <button onclick="register()">Register</button>
-    <div class="error" id="errorMsg"></div>
+    <h1>Company Registration</h1>
+    <form id="companyRegisterForm">
+      <input type="text" id="token" placeholder="Enter Token" required>
+      <input type="text" id="name" placeholder="Company Name" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="text" id="phone" placeholder="Phone Number" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button type="submit">Register</button>
+    </form>
+    <p id="message"></p>
   </div>
 
   <script>
-    async function register() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get('token');
-      const name = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const errorMsg = document.getElementById('errorMsg');
+    document.getElementById('companyRegisterForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-      if (!token || !name || !email || !phone || !password) {
-        errorMsg.textContent = "All fields are required.";
-        return;
-      }
+      const token = document.getElementById('token').value;
+      const name = document.getElementById('name').value;
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+      const password = document.getElementById('password').value;
+      const message = document.getElementById('message');
 
       try {
-        const res = await fetch('https://blacklist-backend.vercel.app/api/company/register', {
+        const response = await fetch('http://localhost:3000/api/company/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token, name, email, phone, password })
         });
 
-        const data = await res.json();
-
-        if (res.ok) {
-          alert("Registration successful!");
-          window.location.href = "company-login.html";
+        const result = await response.json();
+        if (response.ok) {
+          message.textContent = result.message;
+          message.style.color = 'lightgreen';
+          document.getElementById('companyRegisterForm').reset();
         } else {
-          errorMsg.textContent = data.message || "Registration failed.";
+          message.textContent = result.message;
+          message.style.color = 'salmon';
         }
       } catch (err) {
-        errorMsg.textContent = "Server error. Please try again.";
+        console.error('Error:', err);
+        message.textContent = 'Server error';
+        message.style.color = 'salmon';
       }
-    }
+    });
   </script>
 </body>
 </html>
