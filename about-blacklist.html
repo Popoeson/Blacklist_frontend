@@ -1,9 +1,7 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>About Us - Blacklist</title>
   <style>
     body {
@@ -12,96 +10,133 @@
       background-color: #f8f9fa;
       color: #333;
     }
+
     header {
-      background-color: #1f1f1f;
+      background: #111;
+      padding: 20px;
       color: white;
-      padding: 20px 40px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
+
     header h1 {
       margin: 0;
       font-size: 24px;
     }
-    nav a {
-      color: white;
-      margin-left: 20px;
-      text-decoration: none;
+
+    .header-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .header-buttons a button {
       padding: 10px 20px;
       background-color: #007bff;
-      border-radius: 5px;
-    }
-    nav a:hover {
-      background-color: #0056b3;
-    }
-    section {
-      padding: 60px 40px;
-    }
-    section h2 {
-      font-size: 32px;
-      margin-bottom: 20px;
-    }
-    .section-content {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 60px;
-    }
-    .section-content img {
-      max-width: 100%;
-      width: 300px;
-      border-radius: 10px;
-      margin-right: 40px;
-    }
-    .section-content p {
-      flex: 1;
-    }
-    footer {
-      background-color: #1f1f1f;
       color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .section {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .section h2 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .section p {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .video-box {
+      margin: 20px 0;
+    }
+
+    .video-box img {
+      width: 100%;
+      max-width: 500px;
+      height: auto;
+      display: block;
+    }
+
+    footer {
+      background-color: #2c2c2c;
+      color: white;
+      padding: 30px 20px;
       text-align: center;
-      padding: 20px;
+    }
+
+    footer input {
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      margin-right: 10px;
+    }
+
+    footer button {
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Blacklist</h1>
-    <nav>
-      <a href="company-register.html">Register</a>
-      <a href="company-login.html">Login</a>
-    </nav>
-  </header>
 
-  <section>
-    <h2>About Us</h2>
-    <div class="section-content">
-      <img src="https://via.placeholder.com/300x200" alt="About">
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque pretium lorem et sapien porttitor, non facilisis augue mattis.</p>
-    </div>
+<header>
+  <h1>Blacklist</h1>
+  <div class="header-buttons">
+    <a href="company-register.html"><button>Register</button></a>
+    <a href="company-login.html"><button>Login</button></a>
+  </div>
+</header>
 
-    <h2>Our Founders</h2>
-    <div class="section-content">
-      <img src="https://via.placeholder.com/300x200" alt="Founders">
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam vehicula felis in ipsum bibendum, nec dignissim leo tincidunt.</p>
-    </div>
+<div class="section">
+  <h2>About Us</h2>
+  <div class="video-box">
+    <img src="about-video-placeholder.jpg" alt="About">
+  </div>
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque pretium lorem et sapien porttitor, non facilisis augue mattis.</p>
+</div>
 
-    <h2>Our Culture</h2>
-    <div class="section-content">
-      <img src="https://via.placeholder.com/300x200" alt="Culture">
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sit amet nulla sed eros finibus rutrum.</p>
-    </div>
+<div class="section">
+  <h2>Our Founders</h2>
+  <div class="video-box">
+    <img src="founders-video-placeholder.jpg" alt="Founders">
+  </div>
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam vehicula felis in ipsum bibendum, nec dignissim leo tincidunt.</p>
+</div>
 
-    <h2>Our Product</h2>
-    <div class="section-content">
-      <img src="https://via.placeholder.com/300x200" alt="Product">
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin vitae malesuada libero. Mauris viverra orci a lacus varius, id luctus magna tincidunt.</p>
-    </div>
-  </section>
+<div class="section">
+  <h2>Our Culture</h2>
+  <div class="video-box">
+    <img src="culture-video-placeholder.jpg" alt="Culture">
+  </div>
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean at justo volutpat, gravida odio non, volutpat nunc.</p>
+</div>
 
-  <footer>
-    <p>&copy; 2025 Blacklist. All rights reserved.</p>
-  </footer>
+<div class="section">
+  <h2>Our Product</h2>
+  <div class="video-box">
+    <img src="product-video-placeholder.jpg" alt="Product">
+  </div>
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris rutrum consectetur risus. Sed eget sem eu lacus convallis ultrices.</p>
+</div>
+
+<footer>
+  <p>Subscribe to our Newsletter</p>
+  <input type="email" placeholder="Enter your email">
+  <button>Subscribe</button>
+  <p style="margin-top: 20px;">&copy; 2025 Blacklist. All rights reserved.</p>
+</footer>
+
 </body>
-</html>
+  </html>
